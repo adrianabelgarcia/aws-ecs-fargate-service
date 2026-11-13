@@ -1,0 +1,46 @@
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl.bak
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+# Private variable files (alarm recipients, account-specific overrides)
+*.private.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.external_modules/
+.tflint.d/
+
+# Go
+app/coverage.out
+app/bin/
+*.test
+*.out
+
+# Build output
+deploy/out/
+dist/
+bin/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# AI assistant / MCP tooling (never committed)
+CLAUDE.md
+.claude/
+.mcp.json
+mcp*.json
+AGENTS.md

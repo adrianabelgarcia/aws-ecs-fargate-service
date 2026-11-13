@@ -1,0 +1,46 @@
+name: terraform
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
+
+# Least privilege at the workflow level. The reusable workflow requests the
+# OIDC token it needs for AWS; no long-lived keys are stored in GitHub.
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Staging is planned on every PR and applied on push to main. Prod waits
+  # for staging, and its apply is gated by the `prod` environment's required
+  # reviewers in repository settings.
+  staging:
+    uses: adrianabelgarcia/aws-iac-foundations/.github/workflows/terraform.yml@v1
+    with:
+      working-directory: terraform/envs/staging
+      environment: staging
+      aws-region: us-east-1
+      aws-role-arn: ${{ vars.AWS_ROLE_ARN_STAGING }}
+      apply: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+  prod:
+    needs: staging
+    uses: adrianabelgarcia/aws-iac-foundations/.github/workflows/terraform.yml@v1
+    with:
+      working-directory: terraform/envs/prod
+      environment: prod
+      aws-region: us-east-1
+      aws-role-arn: ${{ vars.AWS_ROLE_ARN_PROD }}
+      apply: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

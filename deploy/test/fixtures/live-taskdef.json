@@ -1,0 +1,35 @@
+{
+  "taskDefinitionArn": "arn:aws:ecs:us-east-1:111111111111:task-definition/items-api:7",
+  "family": "items-api",
+  "revision": 7,
+  "status": "ACTIVE",
+  "requiresAttributes": [{"name": "com.amazonaws.ecs.capability.logging-driver.awslogs"}],
+  "compatibilities": ["FARGATE"],
+  "registeredAt": "2026-11-01T10:00:00Z",
+  "registeredBy": "arn:aws:sts::111111111111:assumed-role/deploy/session",
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::111111111111:role/items-api-task-execution",
+  "taskRoleArn": "arn:aws:iam::111111111111:role/items-api-task",
+  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": {"operatingSystemFamily": "LINUX", "cpuArchitecture": "X86_64"},
+  "containerDefinitions": [
+    {
+      "name": "items-api",
+      "image": "111111111111.dkr.ecr.us-east-1.amazonaws.com/items-api:old",
+      "essential": true,
+      "readonlyRootFilesystem": true,
+      "environment": [
+        {"name": "APP_ENV", "value": "staging"},
+        {"name": "SERVICE_VERSION", "value": "previous"}
+      ],
+      "secrets": [{"name": "API_TOKEN", "valueFrom": "arn:aws:secretsmanager:us-east-1:111111111111:secret:items-api-staging/api-token-AbCdEf"}]
+    },
+    {
+      "name": "sidecar",
+      "image": "111111111111.dkr.ecr.us-east-1.amazonaws.com/sidecar:1",
+      "essential": false
+    }
+  ]
+}

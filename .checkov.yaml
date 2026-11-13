@@ -1,0 +1,15 @@
+# Checkov configuration. Hard-fails on every check except the ones listed in
+# `skip-check`, which must also carry an inline justification at the resource.
+framework:
+  - terraform
+directory:
+  - terraform
+download-external-modules: true
+soft-fail: false
+quiet: true
+compact: true
+skip-path:
+  - "**/.terraform/**"
+  - "**/.external_modules/**"
+output:
+  - cli

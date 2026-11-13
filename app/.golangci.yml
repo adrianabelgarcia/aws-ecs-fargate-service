@@ -1,0 +1,47 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosec
+    - errorlint
+    - bodyclose
+    - noctx
+    - gocritic
+    - revive
+    - misspell
+    - unconvert
+    - prealloc
+    - nilerr
+    - gocognit
+  settings:
+    gocognit:
+      min-complexity: 20
+    revive:
+      rules:
+        - name: exported
+          disabled: false
+    gosec:
+      excludes:
+        - G104
+  exclusions:
+    generated: lax
+    rules:
+      - path: _test\.go
+        linters:
+          - gosec
+          - gocognit
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

@@ -1,0 +1,59 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /app
+    schedule:
+      interval: weekly
+    groups:
+      go-minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: docker
+    directory: /app
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: terraform
+    directory: /terraform/envs/staging
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: terraform
+    directory: /terraform/envs/prod
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: terraform
+    directory: /terraform/modules/network
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: terraform
+    directory: /terraform/modules/platform
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: terraform
+    directory: /terraform/modules/edge
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: terraform
+    directory: /terraform/modules/ecs-service
+    schedule:
+      interval: weekly
