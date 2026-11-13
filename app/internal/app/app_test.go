@@ -42,12 +42,20 @@ func listen(t *testing.T) net.Listener {
 	return ln
 }
 
+// testClient never keeps connections alive. A pooled-but-unused connection
+// would sit in StateNew on the server, and http.Server.Shutdown waits up to
+// five seconds for such connections, which made the lifecycle test flaky.
+var testClient = &http.Client{
+	Timeout:   10 * time.Second,
+	Transport: &http.Transport{DisableKeepAlives: true},
+}
+
 func getURL(url string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-	return http.DefaultClient.Do(req)
+	return testClient.Do(req)
 }
 
 func TestServe_LifecycleAndGracefulShutdown(t *testing.T) {
@@ -120,7 +128,7 @@ func TestRun_FailsWhenPortInUse(t *testing.T) {
 	busy := wildcardListener(t)
 	cfg := testConfig()
 	cfg.HTTPPort = busy.Addr().(*net.TCPAddr).Port
-	cfg.MetricsPort = freePort(t)
+	cfg.MetricsPort = 0 // never reached: the API bind fails first
 	if err := Run(context.Background(), cfg, io.Discard); err == nil || !strings.Contains(err.Error(), "listen api") {
 		t.Fatalf("Run() = %v, want listen api error", err)
 	}
@@ -130,7 +138,7 @@ func TestRun_FailsWhenMetricsPortInUse(t *testing.T) {
 	t.Parallel()
 	busy := wildcardListener(t)
 	cfg := testConfig()
-	cfg.HTTPPort = freePort(t)
+	cfg.HTTPPort = 0 // kernel picks a free port, so there is nothing to race
 	cfg.MetricsPort = busy.Addr().(*net.TCPAddr).Port
 	if err := Run(context.Background(), cfg, io.Discard); err == nil || !strings.Contains(err.Error(), "listen metrics") {
 		t.Fatalf("Run() = %v, want listen metrics error", err)
@@ -143,6 +151,9 @@ func TestProbe(t *testing.T) {
 	defer ok.Close()
 	bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusServiceUnavailable) }))
 	defer bad.Close()
+	gone := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	goneURL := gone.URL
+	gone.Close() // the port is now closed; connections are refused
 
 	if err := Probe(context.Background(), ok.URL); err != nil {
 		t.Errorf("Probe(2xx) = %v", err)
@@ -153,7 +164,7 @@ func TestProbe(t *testing.T) {
 	if err := Probe(context.Background(), "http://[::1"); err == nil {
 		t.Error("Probe(invalid url) should fail")
 	}
-	if err := Probe(context.Background(), "http://127.0.0.1:1/healthz"); err == nil {
+	if err := Probe(context.Background(), goneURL); err == nil {
 		t.Error("Probe(refused) should fail")
 	}
 }
@@ -185,9 +196,4 @@ func waitForStatus(t *testing.T, url string, want int) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	t.Fatalf("%s never returned %d", url, want)
-}
-
-func freePort(t *testing.T) int {
-	t.Helper()
-	return listen(t).Addr().(*net.TCPAddr).Port
 }

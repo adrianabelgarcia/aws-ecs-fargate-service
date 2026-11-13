@@ -1,13 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
-# Global build arguments must precede the first FROM to be usable in FROM lines.
-# Both images are pinned by tag and digest so builds are reproducible;
-# Dependabot (docker ecosystem) proposes digest bumps.
-ARG GO_IMAGE=golang:1.27.4-bookworm@sha256:4fa7c968ba93f1635670522dbb01a2c78150443e1385746924566079f36570ea
-ARG RUNTIME_IMAGE=gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab
+# Both base images are pinned by tag AND digest (hadolint DL3006 requires an
+# explicit tag). Dependabot (docker ecosystem) proposes digest bumps.
 
 # ---- build ---------------------------------------------------------------
-FROM ${GO_IMAGE} AS build
+FROM golang:1.27.4-bookworm@sha256:4fa7c968ba93f1635670522dbb01a2c78150443e1385746924566079f36570ea AS build
 
 WORKDIR /src
 
@@ -24,7 +21,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 # distroless/static: no shell, no package manager; CA certificates and tzdata only.
 # The :nonroot variant runs as UID 65532. There is no HEALTHCHECK here: the ECS
 # task definition runs `api healthcheck` instead, because this image has no shell.
-FROM ${RUNTIME_IMAGE} AS runtime
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab AS runtime
 
 ARG SERVICE_VERSION=dev
 ENV APP_ENV=prod \

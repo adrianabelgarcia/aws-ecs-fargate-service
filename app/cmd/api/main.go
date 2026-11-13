@@ -16,6 +16,10 @@ import (
 	"github.com/adrianabelgarcia/aws-ecs-fargate-service/app/internal/config"
 )
 
+// serve runs the API until ctx is cancelled. It is a variable so tests can
+// exercise run's wiring without binding real ports.
+var serve = app.Run
+
 const (
 	exitOK       = 0
 	exitFailure  = 1
@@ -46,7 +50,7 @@ func run(ctx context.Context, args []string, lookup config.Lookup, stdout, stder
 		return exitOK
 	}
 
-	if err := app.Run(ctx, cfg, stdout); err != nil {
+	if err := serve(ctx, cfg, stdout); err != nil {
 		_, _ = fmt.Fprintln(stderr, "service exited with error:", err)
 		return exitFailure
 	}
