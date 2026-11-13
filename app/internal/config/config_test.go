@@ -55,7 +55,7 @@ func TestLoad_Overrides(t *testing.T) {
 		ServiceName: "orders", ServiceVersion: "1.2.3", Environment: "staging",
 		HTTPPort: 3000, MetricsPort: 3001, LogLevel: slog.LevelDebug,
 		ShutdownTimeout: 30 * time.Second, ReadyDrainDelay: 0, MaxPageSize: 50,
-		APIToken: "0123456789abcdef",
+		APIToken: "0123456789abcdef", // gitleaks:allow (test fixture, not a secret)
 	}
 	if cfg != want {
 		t.Errorf("Load() = %+v, want %+v", cfg, want)

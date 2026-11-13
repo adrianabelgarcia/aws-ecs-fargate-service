@@ -58,11 +58,11 @@ Wait for the deployment to succeed, and remove `/tmp/revision.json` afterwards.
 
 ```bash
 # Old token must now be rejected
-curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "Authorization: Bearer OLD_TOKEN" \
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "Authorization: Bearer ${OLD_TOKEN}" \
   -H 'Content-Type: application/json' -d '{"name":"rotation-check"}' "$BASE_URL/api/v1/items"   # expect 401
 
 # New token must be accepted (use a throwaway item name and delete it afterwards if the API supports it)
-curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "Authorization: Bearer NEW_TOKEN" \
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "Authorization: Bearer ${NEW_TOKEN}" \
   -H 'Content-Type: application/json' -d '{"name":"rotation-check"}' "$BASE_URL/api/v1/items"   # expect 201
 ```
 

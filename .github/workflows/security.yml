@@ -1,0 +1,64 @@
+name: security
+
+# Supply-chain and secret hygiene gate, run on every PR, on main and weekly
+# (new gitleaks/zizmor rules catch issues in code that has not changed).
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    name: secret scan (gitleaks, full history)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install gitleaks (checksum verified)
+        run: |
+          set -euo pipefail
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "${RUNNER_TEMP}/${archive}" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
+          echo "${GITLEAKS_SHA256}  ${RUNNER_TEMP}/${archive}" | sha256sum --check --strict
+          tar -xzf "${RUNNER_TEMP}/${archive}" -C "${RUNNER_TEMP}" gitleaks
+          echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
+
+      - name: Scan every commit
+        run: gitleaks git . --redact --no-banner --exit-code 1
+
+  workflows:
+    name: workflow audit (zizmor)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      ZIZMOR_VERSION: "1.32.0"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Audit GitHub Actions (fail on medium and above)
+        run: |
+          set -euo pipefail
+          pipx install "zizmor==${ZIZMOR_VERSION}" >/dev/null
+          zizmor --offline --min-severity medium --format github .

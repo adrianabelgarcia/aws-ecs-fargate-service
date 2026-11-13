@@ -9,6 +9,8 @@ updates:
         update-types: [minor, patch]
     commit-message:
       prefix: "chore(deps)"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: docker
     directory: /app
@@ -16,6 +18,8 @@ updates:
       interval: weekly
     commit-message:
       prefix: "chore(deps)"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: github-actions
     directory: /
@@ -23,6 +27,8 @@ updates:
       interval: weekly
     commit-message:
       prefix: "ci"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: terraform
     directory: /terraform/envs/staging
@@ -30,6 +36,8 @@ updates:
       interval: weekly
     commit-message:
       prefix: "chore(deps)"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: terraform
     directory: /terraform/envs/prod
@@ -37,23 +45,33 @@ updates:
       interval: weekly
     commit-message:
       prefix: "chore(deps)"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: terraform
     directory: /terraform/modules/network
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: terraform
     directory: /terraform/modules/platform
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: terraform
     directory: /terraform/modules/edge
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: terraform
     directory: /terraform/modules/ecs-service
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7

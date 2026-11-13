@@ -16,7 +16,7 @@ import (
 	"github.com/adrianabelgarcia/aws-ecs-fargate-service/app/internal/metrics"
 )
 
-const testToken = "0123456789abcdef"
+const testToken = "0123456789abcdef" // gitleaks:allow (test fixture, not a secret)
 
 type stubRepo struct {
 	getErr  error

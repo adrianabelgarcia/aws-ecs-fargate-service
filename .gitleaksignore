@@ -1,0 +1,6 @@
+# Reviewed false positives in history (initial commit). None are secrets:
+# a 16-char test fixture token and a runbook placeholder. Current files use
+# inline gitleaks:allow annotations / environment variables instead.
+e72bf2b071fd7287242c7bfd1011ed1249fe0bee:app/internal/config/config_test.go:generic-api-key:58
+e72bf2b071fd7287242c7bfd1011ed1249fe0bee:app/internal/server/server_test.go:generic-api-key:19
+e72bf2b071fd7287242c7bfd1011ed1249fe0bee:docs/runbooks/secret-rotation.md:curl-auth-header:61
