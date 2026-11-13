@@ -37,7 +37,7 @@ jobs:
         with:
           go-version-file: ${{ env.GO_VERSION_FILE }}
           cache-dependency-path: app/go.sum
-      - uses: golangci/golangci-lint-action@v8
+      - uses: golangci/golangci-lint-action@v9
         with:
           version: v2.15.0
           working-directory: app
